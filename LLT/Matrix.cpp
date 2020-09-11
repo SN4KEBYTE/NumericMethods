@@ -116,7 +116,7 @@ public:
       au = *(new std::vector<T>(al));
    }
 
-   void direct(std::vector<T>& b)
+   void forward(std::vector<T>& b)
    {
       for (int i = 0; i < dim; i++)
       {
@@ -131,7 +131,7 @@ public:
       }
    }
 
-   void reverse(std::vector<T>& y)
+   void backward(std::vector<T>& y)
    {
       for (int i = dim - 1; i >= 0; i--)
       {
