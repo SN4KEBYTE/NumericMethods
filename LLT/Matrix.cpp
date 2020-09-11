@@ -81,19 +81,19 @@ public:
             *e /= di[0];
 
          // l(i, c)
-         // i - индекс текущей строки
-         // j - индекс текущего элемента в al (идем по профилю строки)
+         // i - index of row
+         // j - index this element in al (go along the profile)
          for (int j = ia[i] + (e != nullptr ? 1 : 0); j < ia[i + 1]; j++)
          {
-            int c = i + j - ia[i + 1]; // столбец в тек. строке
-            int wsRow = i - (ia[i + 1] - ia[i]); // количество пустых ячеек в тек. строке
-            int wsCol = c - (ia[c + 1] - ia[c]); // количество пустых ячеек в строке колонки
+            int c = i + j - ia[i + 1]; // column in row
+            int wsRow = i - (ia[i + 1] - ia[i]); // the number of whitespaces in the current row
+            int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
 
             T r = 0;
             if (wsCol >= wsRow)
             {
                for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
-                  r += al[p] * al[ia[i] + s + wsCol - wsRow]; // что-то с индексацией
+                  r += al[p] * al[ia[i] + s + wsCol - wsRow];
             }
             else
             {
@@ -137,7 +137,7 @@ public:
       {
          T elem = y[i];
          for (int j = ia[dim - i - 1], s = dim - 1; j < ia[dim - i]; j++, s--)
-            elem -= au[j] * y[s];
+            elem -= al[j] * y[s];
          elem /= di[i];
          y[i] = elem;
       }

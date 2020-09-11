@@ -7,12 +7,20 @@ int main()
 {
    Matrix<type> m;
    vector<type> b;
+   // Input.
    ifstream in("matrix3.txt");
    m.input(in, b);
+   in.close();
+
+   // Solving.
    m.factorization();
    m.direct(b);
    m.reverse(b);
+
+   // Output and clear memory.
    m.~Matrix();
+   ofstream out("out.txt");
    for (int i = 0; i < m.getDimension(); i++)
-      cout << b[i] << " ";
+      out << b[i] << " ";
+   out.close();
 }
