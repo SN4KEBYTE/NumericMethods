@@ -14,8 +14,8 @@ int main()
 
    // Solving.
    m.factorization();
-   m.direct(b);
-   m.reverse(b);
+   m.forward(b);
+   m.backward(b);
 
    // Output and clear memory.
    m.~Matrix();
