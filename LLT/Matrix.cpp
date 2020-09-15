@@ -4,12 +4,27 @@
 template<typename T>
 class Matrix
 {
+
+#pragma region Private
 private:
    int dim = 0;
    std::vector<T> al, au, di;
    std::vector<int> ia, ja;
+#pragma endregion
+
+#pragma region Public
 public:
-   int getDimension() { return dim; }
+   ~Matrix()
+   {
+      al.clear();
+      au.clear();
+      di.clear();
+      ia.clear();
+      ja.clear();
+   }
+   #pragma region Methods
+
+   inline int getDimension() { return dim; }
 
    T getElem(int i, int j)
    {
@@ -70,22 +85,24 @@ public:
          inputStream >> b[i];
    }
 
+   #pragma region Solving methods
+   // ((dim - 1)^3 * dim^4 / 8)
    void factorization()
    {
       di[0] = sqrt(di[0]);
       for (int i = 1; i < dim; i++)
       {
-         // l(i, 1)
+         #pragma region l(i, 1)
          T* e = getElemPtr(i, 0);
          if (e != nullptr)
             *e /= di[0];
-
-         // l(i, c)
+         #pragma endregion
+         #pragma region l(i, c)
          // i - index of row
          // j - index this element in al (go along the profile)
          for (int j = ia[i] + (e != nullptr ? 1 : 0); j < ia[i + 1]; j++)
          {
-            int c = i + j - ia[i + 1]; // column in row
+            int c = i + j - ia[i + 1];           // column in row
             int wsRow = i - (ia[i + 1] - ia[i]); // the number of whitespaces in the current row
             int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
 
@@ -104,11 +121,12 @@ public:
             al[j] -= r;
             al[j] /= di[c];
          }
-
-         // l(i, i)
+         #pragma endregion
+         #pragma region l(i, i)
          for (int p = ia[i]; p < ia[i + 1]; p++)
             di[i] -= al[p] * al[p];
          di[i] = sqrt(di[i]);
+#pragma endregion
       }
 
       // LT
@@ -116,6 +134,7 @@ public:
       au = *(new std::vector<T>(al));
    }
 
+   // (dim^2(dim - 1) / 2)
    void forward(std::vector<T>& b)
    {
       for (int i = 0; i < dim; i++)
@@ -131,24 +150,22 @@ public:
       }
    }
 
+   // (dim^2(dim - 1) / 2)
    void backward(std::vector<T>& y)
    {
-      for (int i = dim - 1; i >= 0; i--)
+      y[dim - 1] /= di[dim - 1];
+
+      for (int i = dim - 1; i > 0; i--)
       {
-         T elem = y[i];
-         for (int j = ia[dim - i - 1], s = dim - 1; j < ia[dim - i]; j++, s--)
-            elem -= al[j] * y[s];
-         elem /= di[i];
-         y[i] = elem;
+         for (int j = ia[i + 1] - 1, s = i - 1; j >= ia[i]; j--, s--)
+            y[s] -= au[j] * y[i];
+         y[i - 1] /= di[i - 1];
       }
    }
+   #pragma endregion
 
-   ~Matrix()
-   {
-      al.clear();
-      au.clear();
-      di.clear();
-      ia.clear();
-      ja.clear();
-   }
+   #pragma endregion
+
+#pragma endregion
+
 };
