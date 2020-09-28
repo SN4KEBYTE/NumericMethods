@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <vector>
-#include "Source.cpp"
 
 using namespace std;
 

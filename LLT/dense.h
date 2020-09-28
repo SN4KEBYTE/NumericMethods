@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <fstream>
+#include "global_const.h"
 
 using namespace std;
 
