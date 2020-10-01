@@ -123,9 +123,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="dense.cpp" />
+    <ClCompile Include="excel.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="MatrixGenerator.cpp" />
+    <ClCompile Include="out.cpp" />
+    <ClCompile Include="research.cpp" />
     <ClCompile Include="Source.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="dense.h" />
+    <ClInclude Include="excel.h" />
+    <ClInclude Include="global_const.h" />
+    <ClInclude Include="out.h" />
+    <ClInclude Include="research.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
