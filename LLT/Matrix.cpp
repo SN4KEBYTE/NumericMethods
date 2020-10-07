@@ -128,6 +128,53 @@ public:
         }
     }
 
+void factorization_d()
+    {
+        di[0] = sqrt(di[0]);
+        
+        for (int i = 1; i < dim; i++)
+        {
+#pragma region l(i, 1)
+            T* e = getElemPtr(i, 0);
+            if (e != nullptr)
+                *e /= di[0];
+#pragma endregion
+
+#pragma region l(i, c)
+            // i - index of row
+            // j - index this element in al (go along the profile)
+            for (int j = ia[i] + (e != nullptr ? 1 : 0); j < ia[i + 1]; j++)
+            {
+                int c = i + j - ia[i + 1];           // column in row
+                int wsRow = i - (ia[i + 1] - ia[i]); // the number of whitespaces in the current row
+                int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
+
+                double r = 0;
+                
+                if (wsCol >= wsRow)
+                    for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
+                        r += al[p] * al[ia[i] + s + wsCol - wsRow];
+                else
+                    for (int p = ia[c] + wsRow - wsCol, s = 0; p < ia[c + 1]; p++, s++)
+                        r += al[p] * al[ia[i] + s];
+
+                al[j] -= r;
+                al[j] /= di[c];
+            }
+#pragma endregion
+
+#pragma region l(i, i)
+            double r = 0;
+            for (int p = ia[i]; p < ia[i + 1]; p++)
+                r -= al[p] * al[p];
+            
+            di[i] -= r;
+            di[i] = sqrt(di[i]);
+#pragma endregion
+        }
+    }
+
+
     // (dim^2(dim - 1) / 2)
     void forward(std::vector<T>& b)
     {
