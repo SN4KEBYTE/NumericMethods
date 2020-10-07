@@ -3,8 +3,8 @@
 #include "Matrix.cpp"
 #include "MatrixGenerator.cpp"
 #include "global_const.h"
+#include "research.h"
 #include <string>
-#include <typeinfo>
 
 using namespace std;
 
@@ -26,6 +26,8 @@ vector<T>& MatrixDotVector(Matrix<T>& m, vector<T>& v)
 #pragma region Main
 int main()
 {
+    ak_research();
+
     system("pause");
 }
 #pragma endregion

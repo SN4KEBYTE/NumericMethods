@@ -23,6 +23,11 @@ public:
         ia.clear();
     }
 
+    void ak_add(T val)
+    {
+        di[0] += val;
+    }
+
 #pragma region Methods
     inline int getDimension() { return dim; }
 
@@ -87,7 +92,7 @@ public:
     void factorization()
     {
         di[0] = sqrt(di[0]);
-        
+
         for (int i = 1; i < dim; i++)
         {
 #pragma region l(i, 1)
@@ -106,7 +111,7 @@ public:
                 int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
 
                 T r = 0;
-                
+
                 if (wsCol >= wsRow)
                     for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
                         r += al[p] * al[ia[i] + s + wsCol - wsRow];
@@ -122,16 +127,16 @@ public:
 #pragma region l(i, i)
             for (int p = ia[i]; p < ia[i + 1]; p++)
                 di[i] -= al[p] * al[p];
-            
+
             di[i] = sqrt(di[i]);
 #pragma endregion
         }
     }
 
-void factorization_d()
+    void factorization_d()
     {
         di[0] = sqrt(di[0]);
-        
+
         for (int i = 1; i < dim; i++)
         {
 #pragma region l(i, 1)
@@ -150,7 +155,7 @@ void factorization_d()
                 int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
 
                 double r = 0;
-                
+
                 if (wsCol >= wsRow)
                     for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
                         r += al[p] * al[ia[i] + s + wsCol - wsRow];
@@ -167,7 +172,7 @@ void factorization_d()
             double r = 0;
             for (int p = ia[i]; p < ia[i + 1]; p++)
                 r -= al[p] * al[p];
-            
+
             di[i] -= r;
             di[i] = sqrt(di[i]);
 #pragma endregion
@@ -200,7 +205,7 @@ void factorization_d()
         {
             for (int j = ia[i + 1] - 1, s = i - 1; j >= ia[i]; j--, s--)
                 y[s] -= au[j] * y[i];
-            
+
             y[i - 1] /= di[i - 1];
         }
     }

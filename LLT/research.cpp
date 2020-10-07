@@ -34,32 +34,63 @@ void initial_testing()
 
 void ak_research()
 {
-    //ofstream out(AK_RESULTS_PATH + TYPE_STR + ".csv");
-    //out.precision(PREC);
-    //out.setf(std::ios::fixed);
-    //out.imbue(locale(""));
+    ofstream out(AK_RESULTS_PATH + "ak_res.csv");
+    out.setf(std::ios::fixed);
+    out.precision(numeric_limits<double>::max_digits10);
+    out.imbue(locale(""));
 
-    //for (int i = 0; i < AK_NUM; i++)
-    //{
-    //    ifstream in(AK_TESTS_PATH + "/matrixAK" + to_string(i) + ".txt");
-    //    Matrix<type> m;
-    //    vector<type> b;
+    ifstream in(AK_TESTS_PATH + "ak.txt");
 
-    //    // input
-    //    m.input(in, b);
-    //    in.close();
+    auto es = get_exact_solution(AK_DIM);
 
-    //    // solve
-    //    m.factorization();
-    //    m.forward(b);
-    //    m.backward(b);
+    for (int i = 0; i < AK_NUM; i++)
+    {
+        Matrix<float> m_float;
+        Matrix<float> m_float_d;
+        vector<float> b_float;
+        vector<float> b_float_d;
 
-    //    // output
-    //    // TODO
+        Matrix<double> m_double;
+        vector<double> b_double;
 
-    //    m.~Matrix();
-    //    b.clear();
-    //}
+        m_float.input(in, b_float);
+
+        in.seekg(0, ios::beg);
+        m_double.input(in, b_double);
+
+        in.seekg(0, ios::beg);
+        m_float_d.input(in, b_float_d);
+
+        in.seekg(0, ios::beg);
+
+        // solve for float using regular factorization
+
+        float coef_f = pow(10, -i);
+        m_float.ak_add(coef_f);
+
+        m_float.factorization();
+        m_float.forward(b_float);
+        m_float.backward(b_float);
+
+        // solve for double using regular factorization
+
+        double coef_d = pow(10, -i);
+        m_double.ak_add(coef_d);
+
+        m_double.factorization();
+        m_double.forward(b_double);
+        m_double.backward(b_double);
+
+        // solve for float using factorization_d
+
+        m_float_d.ak_add(coef_f);
+
+        m_float_d.factorization_d();
+        m_float_d.forward(b_float_d);
+        m_float_d.backward(b_float_d);
+
+        dump_research(out, i, b_float, b_float_d, b_double, es);
+    }
 }
 
 void gilbert_research()

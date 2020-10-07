@@ -5,7 +5,6 @@
 #include <vector>
 #include "global_const.h"
 #include "Matrix.cpp"
-#include "out.h"
 #include "excel.h"
 
 using namespace std;
