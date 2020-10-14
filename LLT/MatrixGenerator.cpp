@@ -3,61 +3,74 @@
 #include <vector>
 #include <fstream>
 #include <random>
+#include "Matrix.cpp"
+
+template<typename T, typename V>
+std::vector<T> MatrixDotVector(Matrix<T> &m, std::vector<V> &v)
+{
+    std::vector<T> res(m.getDimension());
+
+    for (int i = 0; i < m.getDimension(); i++)
+        for (int j = 0; j < m.getDimension(); j++)
+            res[i] += m.getElem(i, j) * v[j];
+
+    return res;
+}
 
 class MatrixGenerator
 {
 public:
-    void Gilbert(std::ostream& out, int dim)
+    void Gilbert(std::ostream &out, const int &dim)
     {
+        Matrix<double> m;
+        std::vector<double> diag(dim), al(dim * dim);
+        std::vector<int> ia(dim + 1);
+
         out << dim << std::endl;
 
         // di
         for (int i = 1; i <= dim; i++)
-            out << 1.0 / (2.0 * i - 1) << " ";
+        {
+            double v = 1.0 / (2.0 * i - 1);
+
+            diag[i - 1] = v;
+            out << v << " ";
+        }
+
         out << std::endl;
 
+        ia[0] = 0;
         out << 0 << " ";
         // ia
         for (int i = 0, s = 0; i < dim; i++, s += i)
+        {
+            ia[i + 1] = s;
             out << s << " ";
+        }
         out << std::endl;
 
         // al
         for (int i = 1; i <= dim; i++)
             for (int j = 1; j < i; j++)
-                out << 1.0 / (i + j - 1.0) << " ";
-        out << std::endl;
-    }
+            {
+                double v = 1.0 / (i + j - 1.0);
 
-    void Ak(std::ostream& out, int dim, int k)
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dist(0, 4);
+                al[(i - 1) * dim + j - 1] = v;
+                out << v << " ";
+            }
 
-        out << dim << std::endl;
-        out.precision(k);
-        out.setf(std::ios::fixed);
+        al.shrink_to_fit();
 
-        std::vector<double> di(dim);
-        for (int p = 0; p < dim; p++)
-        {
-            double elem = 0;
-            for (int i = 0; i < dim; i++)
-                elem -= dist(gen);
-            if (p == 0)
-                elem += pow(10, -k);
-            out << elem << " ";
-            di[p] = elem;
-        }
         out << std::endl;
 
-        for (int i = 0; i < dim + 1; i++)
-            out << 0 << " ";
-        out << std::endl;
+        m.from_data(dim, al, diag, ia);
 
-        for (int i = 1; i <= dim; i++)
-            out << di[i - 1] * i << " ";
-        out << std::endl;
+        std::vector<double> es(dim);
+
+        for (size_t i = 0; i < dim; i++)
+            es[i] = i + 1;
+
+        for (const auto &el : MatrixDotVector(m, es))
+            out << el << " ";
     }
 };

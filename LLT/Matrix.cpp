@@ -23,6 +23,14 @@ public:
         ia.clear();
     }
 
+    void from_data(const int &dim, const std::vector<T> &al, const std::vector<T> &di, const std::vector<int> &ia)
+    {
+        this->dim = dim;
+        this->al = al;
+        this->di = di;
+        this->ia = ia;
+    }
+
     void ak_add(T val)
     {
         di[0] += val;
@@ -47,7 +55,7 @@ public:
                 return au[i - j + ia[j + 1]];
     }
 
-    T* getElemPtr(int i, int j)
+    T *getElemPtr(int i, int j)
     {
         if (i == j)
             return &di[i];
@@ -63,7 +71,7 @@ public:
                 return &au[i - j + ia[j + 1]];
     }
 
-    void input(std::ifstream& inputStream, std::vector<T>& b)
+    void input(std::ifstream &inputStream, std::vector<T> &b)
     {
         inputStream >> dim;
         di.resize(dim);
@@ -96,7 +104,7 @@ public:
         for (int i = 1; i < dim; i++)
         {
 #pragma region l(i, 1)
-            T* e = getElemPtr(i, 0);
+            T *e = getElemPtr(i, 0);
             if (e != nullptr)
                 *e /= di[0];
 #pragma endregion
@@ -140,7 +148,7 @@ public:
         for (int i = 1; i < dim; i++)
         {
 #pragma region l(i, 1)
-            T* e = getElemPtr(i, 0);
+            T *e = getElemPtr(i, 0);
             if (e != nullptr)
                 *e /= di[0];
 #pragma endregion
@@ -181,7 +189,7 @@ public:
 
 
     // (dim^2(dim - 1) / 2)
-    void forward(std::vector<T>& b)
+    void forward(std::vector<T> &b)
     {
         for (int i = 0; i < dim; i++)
         {
@@ -197,7 +205,7 @@ public:
     }
 
     // (dim^2(dim - 1) / 2)
-    void backward(std::vector<T>& y)
+    void backward(std::vector<T> &y)
     {
         y[dim - 1] /= di[dim - 1];
 

@@ -18,7 +18,11 @@ const int AK_DIM = 10;
 const int AK_NUM = 15;
 
 // for Gilbert matrices research
-const int GILBERT_NUM = 9;
+const int GILBERT_NUM = 15;
+
+// for Gaussian research
+const int G_DIM = 10;
+const double EPS = 1e-14; // FLOAT 1e-6, DOUBLE 1e-14
 
 #pragma endregion
 
@@ -35,6 +39,10 @@ const string AK_RESULTS_PATH = "ak/results/";
 const string GILBERT_TESTS_PATH = "gilbert/tests/";
 const string GILBERT_RESULTS_PATH = "gilbert/results/";
 
+// for Gaussian research
+const string GAUSSIAN_TESTS_PATH = "gaussian/tests/";
+const string GAUSSIAN_RESULTS_PATH = "gaussian/results/";
+
 #pragma endregion
 
 void initial_testing();
@@ -43,4 +51,13 @@ void ak_research();
 
 void gilbert_research();
 
-vector<int> get_exact_solution(const int &N);
+void gaussian_research();
+
+template <typename T>
+int gauss(std::vector<std::vector<T>> &A, std::vector<T> &x);
+
+template<typename T>
+vector<T> get_exact_solution(const int &N);
+
+template<typename T>
+void print_vector(std::vector<T> &v, std::ostream &out);
