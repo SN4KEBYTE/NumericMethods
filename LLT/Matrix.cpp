@@ -99,47 +99,54 @@ public:
     // ((dim - 1)^3 * dim^4 / 8)
     void factorization()
     {
-        di[0] = sqrt(di[0]);
-
-        for (int i = 1; i < dim; i++)
+        for (int i = 0; i < dim; i++)
         {
-#pragma region l(i, 1)
-            T *e = getElemPtr(i, 0);
-            if (e != nullptr)
-                *e /= di[0];
-#pragma endregion
-
-#pragma region l(i, c)
             // i - index of row
             // j - index this element in al (go along the profile)
-            for (int j = ia[i] + (e != nullptr ? 1 : 0); j < ia[i + 1]; j++)
-            {
-                int c = i + j - ia[i + 1];           // column in row
-                int wsRow = i - (ia[i + 1] - ia[i]); // the number of whitespaces in the current row
-                int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
+                int i0 = ia[i];
+                int i1 = ia[i+1];
+                int j = i – (i1 - i0);
+                T sum_di = 0;
 
-                T r = 0;
+                for (int k = i0; k < i1; k++, j++)
+                {
+                    int j0 = ia[j];
+                    int j1 = ia[j + 1];
 
-                if (wsCol >= wsRow)
-                    for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
-                        r += al[p] * al[ia[i] + s + wsCol - wsRow];
-                else
-                    for (int p = ia[c] + wsRow - wsCol, s = 0; p < ia[c + 1]; p++, s++)
-                        r += al[p] * al[ia[i] + s];
+                    T sum = 0;
 
-                al[j] -= r;
-                al[j] /= di[c];
-            }
+                    int ki = i0;
+                    int kj = j0;
+
+                    int kui = k - i0;
+                    int kuj = j1 - j0;
+                    int kur = kui - kuj;
+
+                    if (kur > 0)
+                    {
+                        ki += kur;
+                    }
+                    else
+                    {
+                        kj -= kur;
+                    }                   
+                        
+                    for (; ki < k; ki++, kj++)
+//                            for (; kj < j1; ki++, kj++)
+                        sum += al[ki] * al[kj];
+
+                    LUal[k] = ( Aal[k] - sum ) / di[j];
+                    sum_di += al[k] * al[k];
+                }
 #pragma endregion
 
 #pragma region l(i, i)
-            for (int p = ia[i]; p < ia[i + 1]; p++)
-                di[i] -= al[p] * al[p];
 
-            di[i] = sqrt(di[i]);
+            LUdi[i] = sqrt(Adi[i] - sum_di);
 #pragma endregion
         }
     }
+
 
     void factorization_d()
     {
@@ -180,8 +187,7 @@ public:
             double r = 0;
             for (int p = ia[i]; p < ia[i + 1]; p++)
                 r -= al[p] * al[p];
-
-            di[i] -= r;
+            di[i] += r;
             di[i] = sqrt(di[i]);
 #pragma endregion
         }
@@ -204,17 +210,34 @@ public:
         }
     }
 
-    // (dim^2(dim - 1) / 2)
-    void backward(std::vector<T> &y)
+    void forward_d(std::vector<T> &b)
     {
-        y[dim - 1] /= di[dim - 1];
-
-        for (int i = dim - 1; i > 0; i--)
+        for (int i = 0; i < dim; i++)
         {
-            for (int j = ia[i + 1] - 1, s = i - 1; j >= ia[i]; j--, s--)
-                y[s] -= au[j] * y[i];
+            double elem = b[i];
+            int d = ia[i + 1] - ia[i];
 
-            y[i - 1] /= di[i - 1];
+            for (int j = ia[i], s = d < i ? i - d : 0; j < ia[i + 1]; j++, s++)
+                elem -= al[j] * b[s];
+
+            elem /= di[i];
+            b[i] = (T)elem;
+        }
+    }
+
+    // (dim^2(dim - 1) / 2)
+    void backward(std::vector<T> &x, std::vector<T> &y)
+    {
+        for (int i = dim - 1; i >= 0; i--)
+        {
+            int i0 = ia[i];
+            int i1 = ia[i + 1];
+            int j = i – (i1 - i0);
+            T sum_di = 0;
+            T xi = x[i] = y[i] / di[i];
+
+            for (int k = i0; k < i1; k++, j++)
+                y[j] -= au[k] * xi;
         }
     }
 #pragma endregion

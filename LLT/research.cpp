@@ -85,11 +85,11 @@ void ak_research()
         m_double.backward(b_double);
 
         // solve for float using factorization_d
-        m_float_d.ak_add(coef_f);
+        m_float_d.ak_add(coef_d);
         b_float_d[0] += coef_d;
 
         m_float_d.factorization_d();
-        m_float_d.forward(b_float_d);
+        m_float_d.forward_d(b_float_d);
         m_float_d.backward(b_float_d);
 
         dump_research(out, i, b_float, b_float_d, b_double, es);

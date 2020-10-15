@@ -9,7 +9,7 @@ using namespace std;
 int main()
 {
     // --- GILBERT ---
-    /*MatrixGenerator gen;
+    MatrixGenerator gen;
     
     for (int i = 2; i <= GILBERT_NUM; i++)
     {
@@ -17,10 +17,10 @@ int main()
         gen.Gilbert(out, i);
     }
 
-    gilbert_research();*/
+    gilbert_research();
 
     // --- AK ---
-    /*ak_research();*/
+    ak_research();
 
     // --- GAUSSIAN ---
     //gaussian_research();
