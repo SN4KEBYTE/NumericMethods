@@ -8,238 +8,233 @@ class Matrix
 {
 #pragma region Private
 private:
-    int dim = 0;
-    std::vector<T> al, di;
-    std::vector<T> &au = al;
-    std::vector<int> ia;
+   int dim = 0;
+   std::vector<T> al, di;
+   std::vector<T>& au = al;
+   std::vector<int> ia;
 #pragma endregion
 
 #pragma region Public
 public:
-    ~Matrix()
-    {
-        al.clear();
-        di.clear();
-        ia.clear();
-    }
+   ~Matrix()
+   {
+      al.clear();
+      di.clear();
+      ia.clear();
+   }
 
-    void from_data(const int &dim, const std::vector<T> &al, const std::vector<T> &di, const std::vector<int> &ia)
-    {
-        this->dim = dim;
-        this->al = al;
-        this->di = di;
-        this->ia = ia;
-    }
+   void from_data(const int& dim, const std::vector<T>& al, const std::vector<T>& di, const std::vector<int>& ia)
+   {
+      this->dim = dim;
+      this->al = al;
+      this->di = di;
+      this->ia = ia;
+   }
 
-    void ak_add(T val)
-    {
-        di[0] += val;
-    }
+   void ak_add(T val)
+   {
+      di[0] += val;
+   }
+   void display(std::ostream& out)
+   {
+      for (int i = 0; i < dim; i++)
+      {
+         for (int j = 0; j < i - (ia[i + 1] - ia[i]); j++)
+            out << 0 << " ";
+         for (int j = ia[i]; j < ia[i + 1]; j++)
+            out << al[j] << " ";
+         out << di[i];
+         out << std::endl;
+      }
+   }
 
 #pragma region Methods
-    inline int getDimension() { return dim; }
+   inline int getDimension() { return dim; }
 
-    T getElem(int i, int j)
-    {
-        if (i == j)
-            return di[i];
-        if (i > j)
-            if (j < i - ia[i + 1] + ia[i])
-                return 0;
-            else
-                return al[j - i + ia[i + 1]];
-        else
-            if (i < j - ia[j + 1] + ia[j])
-                return 0;
-            else
-                return au[i - j + ia[j + 1]];
-    }
+   T getElem(int i, int j)
+   {
+      if (i == j)
+         return di[i];
+      if (i > j)
+         if (j < i - ia[i + 1] + ia[i])
+            return 0;
+         else
+            return al[j - i + ia[i + 1]];
+      else
+         if (i < j - ia[j + 1] + ia[j])
+            return 0;
+         else
+            return au[i - j + ia[j + 1]];
+   }
 
-    T *getElemPtr(int i, int j)
-    {
-        if (i == j)
-            return &di[i];
-        if (i > j)
-            if (j < i - ia[i + 1] + ia[i])
-                return nullptr;
-            else
-                return &al[j - i + ia[i + 1]];
-        else
-            if (i < j - ia[j + 1] + ia[j])
-                return nullptr;
-            else
-                return &au[i - j + ia[j + 1]];
-    }
+   T* getElemPtr(int i, int j)
+   {
+      if (i == j)
+         return &di[i];
+      if (i > j)
+         if (j < i - ia[i + 1] + ia[i])
+            return nullptr;
+         else
+            return &al[j - i + ia[i + 1]];
+      else
+         if (i < j - ia[j + 1] + ia[j])
+            return nullptr;
+         else
+            return &au[i - j + ia[j + 1]];
+   }
 
-    void input(std::ifstream &inputStream, std::vector<T> &b)
-    {
-        inputStream >> dim;
-        di.resize(dim);
-        ia.resize(dim + 1);
-        b.resize(dim);
+   void input(std::ifstream& inputStream, std::vector<T>& b)
+   {
+      inputStream >> dim;
+      di.resize(dim);
+      ia.resize(dim + 1);
+      b.resize(dim);
 
-        for (int i = 0; i < dim; i++)
-            inputStream >> di[i];
+      for (int i = 0; i < dim; i++)
+         inputStream >> di[i];
 
-        for (int i = 0; i < dim + 1; i++)
-            inputStream >> ia[i];
+      for (int i = 0; i < dim + 1; i++)
+         inputStream >> ia[i];
 
-        auto size = ia.back();
-        al.resize(size);
+      auto size = ia.back();
+      al.resize(size);
 
-        for (int i = 0; i < size; i++)
-            inputStream >> al[i];
+      for (int i = 0; i < size; i++)
+         inputStream >> al[i];
 
-        for (int i = 0; i < dim; i++)
-            inputStream >> b[i];
-    }
+      for (int i = 0; i < dim; i++)
+         inputStream >> b[i];
+   }
 #pragma endregion
 
 #pragma region Solving methods
-    // ((dim - 1)^3 * dim^4 / 8)
-    void factorization()
-    {
-        for (int i = 0; i < dim; i++)
-        {
-            // i - index of row
-            // j - index this element in al (go along the profile)
-                int i0 = ia[i];
-                int i1 = ia[i+1];
-                int j = i Ц (i1 - i0);
-                T sum_di = 0;
+   void factorization(Matrix<T>& LU)
+   {
+      for (int i = 0; i < dim; i++)
+      {
+         // i - index of row
+         // j - index of column
+         int i0 = ia[i];
+         int i1 = ia[i + 1];
+         int j = i - (i1 - i0);
+         T sum_di = 0;
 
-                for (int k = i0; k < i1; k++, j++)
-                {
-                    int j0 = ia[j];
-                    int j1 = ia[j + 1];
+         for (int k = i0; k < i1; k++, j++)
+         {
+            int j0 = ia[j];
+            int j1 = ia[j + 1];
 
-                    T sum = 0;
+            T sum = 0;
 
-                    int ki = i0;
-                    int kj = j0;
+            int ki = i0;
+            int kj = j0;
 
-                    int kui = k - i0;
-                    int kuj = j1 - j0;
-                    int kur = kui - kuj;
+            int kui = k - i0;
+            int kuj = j1 - j0;
+            int kur = kui - kuj;
 
-                    if (kur > 0)
-                    {
-                        ki += kur;
-                    }
-                    else
-                    {
-                        kj -= kur;
-                    }                   
-                        
-                    for (; ki < k; ki++, kj++)
-//                            for (; kj < j1; ki++, kj++)
-                        sum += al[ki] * al[kj];
+            if (kur > 0)
+               ki += kur;
+            else
+               kj -= kur;
 
-                    LUal[k] = ( Aal[k] - sum ) / di[j];
-                    sum_di += al[k] * al[k];
-                }
-#pragma endregion
+            for (; ki < k; ki++, kj++)
+               sum += al[ki] * al[kj];
 
-#pragma region l(i, i)
+            LU.al[k] = (al[k] - sum) / LU.di[j];
+            sum_di += LU.al[k] * LU.al[k];
+         }
+         LU.di[i] = sqrt(di[i] - sum_di);
+      }
+   }
 
-            LUdi[i] = sqrt(Adi[i] - sum_di);
-#pragma endregion
-        }
-    }
+   void factorization_d(Matrix<T>& LU)
+   {
+      for (int i = 0; i < dim; i++)
+      {
+         // i - index of row
+         // j - index of column
+         int i0 = ia[i];
+         int i1 = ia[i + 1];
+         int j = i - (i1 - i0);
+         T sum_di = 0;
 
+         for (int k = i0; k < i1; k++, j++)
+         {
+            int j0 = ia[j];
+            int j1 = ia[j + 1];
 
-    void factorization_d()
-    {
-        di[0] = sqrt(di[0]);
+            double sum = 0;
 
-        for (int i = 1; i < dim; i++)
-        {
-#pragma region l(i, 1)
-            T *e = getElemPtr(i, 0);
-            if (e != nullptr)
-                *e /= di[0];
-#pragma endregion
+            int ki = i0;
+            int kj = j0;
 
-#pragma region l(i, c)
-            // i - index of row
-            // j - index this element in al (go along the profile)
-            for (int j = ia[i] + (e != nullptr ? 1 : 0); j < ia[i + 1]; j++)
-            {
-                int c = i + j - ia[i + 1];           // column in row
-                int wsRow = i - (ia[i + 1] - ia[i]); // the number of whitespaces in the current row
-                int wsCol = c - (ia[c + 1] - ia[c]); // the number of whitespaces in row of the column
+            int kui = k - i0;
+            int kuj = j1 - j0;
+            int kur = kui - kuj;
 
-                double r = 0;
+            if (kur > 0)
+               ki += kur;
+            else
+               kj -= kur;
 
-                if (wsCol >= wsRow)
-                    for (int p = ia[c], s = 0; p < ia[c + 1]; p++, s++)
-                        r += al[p] * al[ia[i] + s + wsCol - wsRow];
-                else
-                    for (int p = ia[c] + wsRow - wsCol, s = 0; p < ia[c + 1]; p++, s++)
-                        r += al[p] * al[ia[i] + s];
+            for (; ki < k; ki++, kj++)
+               sum += al[ki] * al[kj];
 
-                al[j] -= r;
-                al[j] /= di[c];
-            }
-#pragma endregion
+            LU.al[k] = (al[k] - sum) / LU.di[j];
+            sum_di += LU.al[k] * LU.al[k];
+         }
+         LU.di[i] = sqrt(di[i] - sum_di);
+      }
+   }
 
-#pragma region l(i, i)
-            double r = 0;
-            for (int p = ia[i]; p < ia[i + 1]; p++)
-                r -= al[p] * al[p];
-            di[i] += r;
-            di[i] = sqrt(di[i]);
-#pragma endregion
-        }
-    }
+   void forward(std::vector<T>& y, std::vector<T>& b)
+   {
+      for (int i = 0; i < dim; i++)
+      {
+         T elem = b[i];
+         int i0 = ia[i];
+         int i1 = ia[i + 1];
 
+         // в k определ€етс€ смещение
+         for (int j = ia[i], k = i1 - i0 < i ? i - (i1 - i0) : 0; j < i1; j++, k++)
+            elem -= al[j] * b[k];
 
-    // (dim^2(dim - 1) / 2)
-    void forward(std::vector<T> &b)
-    {
-        for (int i = 0; i < dim; i++)
-        {
-            T elem = b[i];
-            int d = ia[i + 1] - ia[i];
+         elem /= di[i];
+         y[i] = elem;
+      }
+   }
 
-            for (int j = ia[i], s = d < i ? i - d : 0; j < ia[i + 1]; j++, s++)
-                elem -= al[j] * b[s];
+   void forward_d(std::vector<T>& y, std::vector<T>& b)
+   {
+      for (int i = 0; i < dim; i++)
+      {
+         double elem = b[i];
+         int i0 = ia[i];
+         int i1 = ia[i + 1];
 
-            elem /= di[i];
-            b[i] = elem;
-        }
-    }
+         // в k определ€етс€ смещение
+         for (int j = ia[i], k = i1 - i0 < i ? i - (i1 - i0) : 0; j < i1; j++, k++)
+            elem -= al[j] * b[k];
 
-    void forward_d(std::vector<T> &b)
-    {
-        for (int i = 0; i < dim; i++)
-        {
-            double elem = b[i];
-            int d = ia[i + 1] - ia[i];
+         elem /= di[i];
+         y[i] = elem;
+      }
+   }
 
-            for (int j = ia[i], s = d < i ? i - d : 0; j < ia[i + 1]; j++, s++)
-                elem -= al[j] * b[s];
+   void backward(std::vector<T>& x, const std::vector<T>& y)
+   {
+      for (int i = dim - 1; i >= 0; i--)
+      {
+         int i0 = ia[i];
+         int i1 = ia[i + 1];
+         int j = i - (i1 - i0);
+         T xi = x[i] = y[i] / di[i];
 
-            elem /= di[i];
-            b[i] = (T)elem;
-        }
-    }
-
-    // (dim^2(dim - 1) / 2)
-    void backward(std::vector<T> &x, std::vector<T> &y)
-    {
-        for (int i = dim - 1; i >= 0; i--)
-        {
-            int i0 = ia[i];
-            int i1 = ia[i + 1];
-            int j = i Ц (i1 - i0);
-            T sum_di = 0;
-            T xi = x[i] = y[i] / di[i];
-
-            for (int k = i0; k < i1; k++, j++)
-                y[j] -= au[k] * xi;
-        }
-    }
+         for (int k = i0; k < i1; k++, j++)
+            x[j] -= au[k] * xi;
+      }
+   }
 #pragma endregion
 
 #pragma endregion

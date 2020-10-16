@@ -15,9 +15,9 @@ void initial_testing()
         in.close();
 
         // solve
-        m.factorization();
-        m.forward(b);
-        m.backward(b);
+        m.factorization(m);
+        m.forward(b, b);
+        m.backward(b, b);
 
         // output
         ofstream out(INITIAL_RESULTS_PATH + end);
@@ -70,9 +70,9 @@ void ak_research()
         m_float.ak_add(coef_f);
         b_float[0] += coef_f;
 
-        m_float.factorization();
-        m_float.forward(b_float);
-        m_float.backward(b_float);
+        m_float.factorization(m_float);
+        m_float.forward(b_float, b_float);
+        m_float.backward(b_float, b_float);
 
         // solve for double using regular factorization
         double coef_d = pow(10, -i);
@@ -80,17 +80,17 @@ void ak_research()
         m_double.ak_add(coef_d);
         b_double[0] += coef_d;
 
-        m_double.factorization();
-        m_double.forward(b_double);
-        m_double.backward(b_double);
+        m_double.factorization(m_double);
+        m_double.forward(b_double, b_double);
+        m_double.backward(b_double, b_double);
 
         // solve for float using factorization_d
         m_float_d.ak_add(coef_d);
         b_float_d[0] += coef_d;
 
-        m_float_d.factorization_d();
-        m_float_d.forward_d(b_float_d);
-        m_float_d.backward(b_float_d);
+        m_float_d.factorization_d(m_float_d);
+        m_float_d.forward_d(b_float_d, b_float_d);
+        m_float_d.backward(b_float_d, b_float_d);
 
         dump_research(out, i, b_float, b_float_d, b_double, es);
     }
@@ -127,19 +127,19 @@ void gilbert_research()
       in.seekg(0, ios::beg);
 
       // solve for float using regular factorization
-      m_float.factorization();
-      m_float.forward(b_float);
-      m_float.backward(b_float);
+      m_float.factorization(m_float);
+      m_float.forward(b_float, b_float);
+      m_float.backward(b_float, b_float);
 
       // solve for double using regular factorization
-      m_double.factorization();
-      m_double.forward(b_double);
-      m_double.backward(b_double);
+      m_double.factorization(m_double);
+      m_double.forward(b_double, b_double);
+      m_double.backward(b_double, b_double);
 
       // solve for float using factorization_d
-      m_float_d.factorization_d();
-      m_float_d.forward(b_float_d);
-      m_float_d.backward(b_float_d);
+      m_float_d.factorization_d(m_float_d);
+      m_float_d.forward(b_float_d, b_float_d);
+      m_float_d.backward(b_float_d, b_float_d);
 
       dump_research(out, i, b_float, b_float_d, b_double, es);
    }
@@ -168,9 +168,9 @@ void gaussian_research()
     auto b_copy = b;
     gauss(md, b_copy);
     
-    mp.factorization();
-    mp.forward(b);
-    mp.backward(b);
+    mp.factorization(mp);
+    mp.forward(b, b);
+    mp.backward(b, b);
 
     auto es = get_exact_solution<double>(AK_DIM);
 
