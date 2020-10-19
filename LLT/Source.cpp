@@ -12,11 +12,12 @@ int main()
    ifstream in("ak/tests/ak.txt");
    vector<double> b;
    m.input(in, b);
+   m.display(cout);
    m.factorization(m);
    m.display(cout);
    m.forward(b, b);
    m.backward(b, b);
-   for (int i = 0; i < 10; i++)
+   for (int i = 0; i < m.getDimension(); i++)
       cout << b[i] << ' ';
     //// --- GILBERT ---
     //MatrixGenerator gen;

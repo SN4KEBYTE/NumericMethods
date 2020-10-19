@@ -67,7 +67,7 @@ public:
 
         std::vector<double> es(dim);
 
-        for (size_t i = 0; i < dim; i++)
+        for (int i = 0; i < dim; i++)
             es[i] = i + 1;
 
         for (const auto &el : MatrixDotVector(m, es))

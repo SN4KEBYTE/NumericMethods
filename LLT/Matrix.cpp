@@ -222,7 +222,7 @@ public:
       }
    }
 
-   void backward(std::vector<T>& x, const std::vector<T>& y)
+   void backward_modify(std::vector<T>& x, const std::vector<T>& y)
    {
       for (int i = dim - 1; i >= 0; i--)
       {
@@ -233,6 +233,43 @@ public:
 
          for (int k = i0; k < i1; k++, j++)
             x[j] -= au[k] * xi;
+      }
+   }
+
+
+   void backward(std::vector<T>& x, const std::vector<T>& y)
+   {
+      for (int i = dim - 1; i >= 0; i--)
+      {
+         T sum = 0;
+         T xi = x[i] = y[i] / di[i];
+
+         for (int j = dim - 1; j > i; j--)
+         {
+            int bias = ia[j + 1] - ia[j] - j + i;
+            if (bias >= 0)
+               sum += al[ia[j] + bias] * y[j];
+         }
+         sum /= di[i];
+         x[i] -= sum;
+      }
+   }
+
+   void backward_d(std::vector<T>& x, const std::vector<T>& y)
+   {
+      for (int i = dim - 1; i >= 0; i--)
+      {
+         double sum = 0;
+         T xi = x[i] = y[i] / di[i];
+
+         for (int j = dim - 1; j > i; j--)
+         {
+            int smeshenie = ia[j + 1] - ia[j] - j + i;
+            if (smeshenie >= 0)
+               sum += al[ia[j] + smeshenie] * y[j];
+         }
+         sum /= di[i];
+         x[i] -= sum;
       }
    }
 #pragma endregion
