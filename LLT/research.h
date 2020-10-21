@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "global_const.h"
 #include "Matrix.cpp"
 #include "excel.h"
 
