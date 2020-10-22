@@ -196,7 +196,7 @@ public:
          int i0 = ia[i];
          int i1 = ia[i + 1];
 
-         // β k ξοπεδελÿεςρÿ ρμεωενθε
+         // Γ’ k Γ®Γ―Γ°Γ₯Γ€Γ₯Γ«ΓΏΓ₯Γ²Γ±ΓΏ Γ±Γ¬Γ₯ΓΉΓ₯Γ­Γ¨Γ₯
          for (int j = ia[i], k = i1 - i0 < i ? i - (i1 - i0) : 0; j < i1; j++, k++)
             elem -= al[j] * b[k];
 
@@ -213,8 +213,8 @@ public:
          int i0 = ia[i];
          int i1 = ia[i + 1];
 
-         // β k ξοπεδελÿεςρÿ ρμεωενθε
-         for (int j = ia[i], k = i1 - i0 < i ? i - (i1 - i0) : 0; j < i1; j++, k++)
+         // Γ’ k Γ®Γ―Γ°Γ₯Γ€Γ₯Γ«ΓΏΓ₯Γ²Γ±ΓΏ Γ±Γ¬Γ₯ΓΉΓ₯Γ­Γ¨Γ₯
+         for (int j = ia[i], k = i - (i1 - i0); j < i1; j++, k++)
             elem -= al[j] * b[k];
 
          elem /= di[i];
