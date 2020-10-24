@@ -196,7 +196,6 @@ public:
          int i0 = ia[i];
          int i1 = ia[i + 1];
 
-         // â k îïðåäåëÿåòñÿ ñìåùåíèå
          for (int j = ia[i], k = i1 - i0 < i ? i - (i1 - i0) : 0; j < i1; j++, k++)
             elem -= al[j] * b[k];
 
@@ -213,7 +212,6 @@ public:
          int i0 = ia[i];
          int i1 = ia[i + 1];
 
-         // â k îïðåäåëÿåòñÿ ñìåùåíèå
          for (int j = ia[i], k = i - (i1 - i0); j < i1; j++, k++)
             elem -= al[j] * b[k];
 
