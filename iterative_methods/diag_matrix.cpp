@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 
+const size_t DIAGS_NUM = 9;
 const size_t SIDE_DIAGS_NUM = 4;
 
 template<typename T>
@@ -10,10 +11,8 @@ class diag_matrix
 {
 private:
     size_t N = 0, m = 0;
-    std::vector<T> di;
-    std::vector<std::vector<T>> ggl(SIDE_DIAGS_NUM);
-    std::vector<std::vector<T>> ggu(SIDE_DIAGS_NUM);
-    std::vector<size_t> ig(SIDE_DIAGS_NUM);
+    std::vector<std::vector<T>> diags;
+    std::vector<size_t> ig;
 
     T relative_residual(const std::vector<T> &f, const std::vector<T> &xk)
     {
@@ -43,72 +42,86 @@ private:
 public:
     diag_matrix(std::istream &in)
     {
+        diags.resize(DIAGS_NUM);
+        ig.resize(SIDE_DIAGS_NUM);
+
         in >> N >> m;
-        di.resize(N);
 
-        for (size_t i = 0; i < di.size(); i++)
-            in >> di[i];
-
-        for (size_t i = 0; i < ggl.size(); i++)
+        for (size_t i = 0; i < diags.size(); i++)
         {
-            ggl[i].resize(N - 1);
+            diags[i].resize(N);
 
-            for (size_t j = 0; j < ggl[i].size(); j++)
-                in >> ggl[i][j];
-        }
-
-        for (size_t i = 0; i < ggu.size(); i++)
-        {
-            ggu[i].resize(N - 1);
-
-            for (size_t j = 0; j < ggu[i].size(); j++)
-                in >> ggu[i][j];
+            for (size_t j = 0; j < diags[i].size(); j++)
+                in >> diags[i][j];
         }
 
         ig[0] = 1;
-        
+
         for (size_t i = 1; i < ig.size(); i++)
-            ig[i] = m + i;
+            ig[i] = m + i + 1;
     }
 
-    diag_matrix(const size_t &N, const size_t &m, const std::vector<T> di, const std::vector<std::vector<T>> &ggl,
-        const std::vector<std::vector<T>> &ggu)
+    diag_matrix(const size_t &N, const size_t &m, const std::vector<T> diags)
     {
         this->N = N;
         this->m = m;
-        this->di = di;
-        this->ggl = ggl;
-        this->ggu = ggu;
+        this->diags = diags;
+    }
+
+    size_t get_dim()
+    {
+        return N;
     }
 
     std::vector<T> dot(const std::vector<T> x)
     {
-        std::vector<T> y(N);
+        std::vector<T> y(x.size());
 
-        for (size_t i = 0; i < di.size(); i++)
-            y[i] = di[i] * x[i];
+        // processing main diagonal
+        for (size_t i = 0; i < N; i++)
+        {
+            y[i] = diags[4][i] * x[i];
 
-        for (size_t i = 0; i < SIDE_DIAGS_NUM; i++)
-            for (size_t j = 0; j < N - ig[i]; j++)
-            {
-                size_t ir = j + ig[i];
-                y[ir] += ggl[i][j] * x[j];
-                y[j] += ggu[i][j] * x[ir];
-            }
+            // lower triangle
+            if (i > 0)
+                y[i] += diags[3][i] * x[i - ig[0]];
+
+            if (i > ig[1] - 1)
+                y[i] += diags[2][i] * x[i - ig[1]];
+
+            if (i > ig[2] - 1)
+                y[i] += diags[1][i] * x[i - ig[2]];
+
+            if (i > ig[3] - 1)
+                y[i] += diags[0][i] * x[i - ig[3]];
+
+            // upper triangle
+            if (i < N - ig[0])
+                y[i] += diags[5][i] * x[i + ig[0]];
+
+            if (i < N - ig[1])
+                y[i] += diags[6][i] * x[i + ig[1]];
+
+            if (i < N - ig[2])
+                y[i] += diags[7][i] * x[i + ig[2]];
+
+            if (i < N - ig[3])
+                y[i] += diags[8][i] * x[i + ig[3]];
+        }
 
         return y;
     }
 
-    void step(const double &omega, std::vector<T> &x, std::vector<T> &x_next, const std::vector<T> &f)
+    void step(const double &omega, std::vector<T> &x, std::vector<T> &x_next, std::vector<T> &y,
+        const std::vector<T> &f)
     {
         // processing main diagonal separately
-        for (size_t i = 0; i < di.size(); i++)
-            x_next[i] = di[i] * x[i];
+        for (size_t i = 0; i < N; i++)
+            x_next[i] = diags[4] * x[i];
 
         // processing upper triangle by rows
 
         // processing lower triangle by rows
-
 
     }
 
@@ -119,7 +132,7 @@ public:
 
     void gauss_seidel()
     {
-        
+
         return;
     }
 };
