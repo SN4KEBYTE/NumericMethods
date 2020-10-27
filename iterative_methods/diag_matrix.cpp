@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 const size_t DIAGS_NUM = 9;
 const size_t SIDE_DIAGS_NUM = 4;
@@ -77,9 +78,9 @@ public:
     {
         std::vector<T> y(x.size());
 
-        // processing main diagonal
         for (size_t i = 0; i < N; i++)
         {
+            // main diagonal
             y[i] = diags[4][i] * x[i];
 
             // lower triangle
@@ -112,27 +113,88 @@ public:
         return y;
     }
 
-    void step(const double &omega, std::vector<T> &x, std::vector<T> &x_next, std::vector<T> &y,
-        const std::vector<T> &f)
+    std::vector<T> step(const double &omega, const std::vector<T> &xk, const std::vector<T> &xk_1, const std::vector<T> &f)
     {
-        // processing main diagonal separately
+        std::vector<T> y(xk.size());
+        T sum1 = 0, sum2 = 0; // sum1 - lower (xk1), sum2 - upper and main diag (xk)
+
         for (size_t i = 0; i < N; i++)
-            x_next[i] = diags[4] * x[i];
+        {
+            // main diagonal
+            sum2 += diags[4][i] * xk[i];
 
-        // processing upper triangle by rows
+            // lower triangle
+            if (i > 0)
+                sum1 += diags[3][i] * xk_1[i - ig[0]];
 
-        // processing lower triangle by rows
+            if (i > ig[1] - 1)
+                sum1 += diags[2][i] * xk_1[i - ig[1]];
 
+            if (i > ig[2] - 1)
+                sum1 += diags[1][i] * xk_1[i - ig[2]];
+
+            if (i > ig[3] - 1)
+                sum1 += diags[0][i] * xk_1[i - ig[3]];
+
+            // upper triangle
+            if (i < N - ig[0])
+                sum2 += diags[5][i] * xk[i + ig[0]];
+
+            if (i < N - ig[1])
+                sum2 += diags[6][i] * xk[i + ig[1]];
+
+            if (i < N - ig[2])
+                sum2 += diags[7][i] * xk[i + ig[2]];
+
+            if (i < N - ig[3])
+                sum2 += diags[8][i] * xk[i + ig[3]];
+        }
+
+        for (size_t i = 0; i < N; i++)
+            y[i] = xk[i] + omega / diags[4][i] * (f[i] - sum1 - sum2);
+        
+        return y;
     }
 
     std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter)
     {
-        std::vector<T> result(N);
+        auto xk = f0;
+        std::vector<T> xk_1;
+        unsigned iter = 0;
+        T rr = 0;
+
+        do
+        {
+            xk_1 = step(omega, xk, xk, f);
+            rr = relative_residual(f, xk_1);
+
+            std::cout << "Iteration ¹" << iter << "; rr = " << rr << std::endl;
+
+            xk = xk_1;
+            iter++;
+        } while (rr >= eps && iter < max_iter);
+
+        return xk_1;
     }
 
-    void gauss_seidel()
+    std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter)
     {
+        auto xk = f0;
+        std::vector<T> xk_1(xk.size());
+        unsigned iter = 0;
+        T rr = 0;
 
-        return;
+        do
+        {
+            xk_1 = step(omega, xk, xk_1, f);
+            rr = relative_residual(f, xk_1);
+
+            std::cout << "Iteration ¹" << iter << "; rr = " << rr << std::endl;
+
+            xk = xk_1;
+            iter++;
+        } while (rr >= eps && iter < max_iter);
+
+        return xk_1;
     }
 };
