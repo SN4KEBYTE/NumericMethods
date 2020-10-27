@@ -7,6 +7,8 @@
 const size_t DIAGS_NUM = 9;
 const size_t SIDE_DIAGS_NUM = 4;
 
+unsigned dummy_iter = 0;
+
 template<typename T>
 class diag_matrix
 {
@@ -156,7 +158,8 @@ public:
         return y;
     }
 
-    std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter)
+    std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
+        unsigned &total_iter = dummy_iter)
     {
         auto xk = f0;
         std::vector<T> xk_1;
@@ -168,16 +171,19 @@ public:
             xk_1 = step(omega, xk, xk, f);
             rr = relative_residual(f, xk_1);
 
-            std::cout << "Iteration ¹" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
             iter++;
         } while (rr >= eps && iter < max_iter);
 
+        total_iter = iter;
+
         return xk_1;
     }
 
-    std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter)
+    std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
+        unsigned &total_iter = dummy_iter)
     {
         auto xk = f0;
         std::vector<T> xk_1(xk.size());
@@ -189,11 +195,13 @@ public:
             xk_1 = step(omega, xk, xk_1, f);
             rr = relative_residual(f, xk_1);
 
-            std::cout << "Iteration ¹" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
             iter++;
         } while (rr >= eps && iter < max_iter);
+
+        total_iter = iter;
 
         return xk_1;
     }
