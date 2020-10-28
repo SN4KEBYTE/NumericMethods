@@ -72,7 +72,8 @@ void initial_testing()
 
 #pragma region weight research
 
-const double W0 = 0.05;
+const double W0 = 0.01;
+const double W_STEP = 0.01;
 const string DATA_PATH = "weight/";
 
 template <typename T>
@@ -131,23 +132,50 @@ void weight_research()
     in >> eps >> max_iter;
     in.close();
 
-    ofstream out("jacobi_res.csv");
+    ofstream out(DATA_PATH + "jacobi_res.csv");
+    out.imbue(locale(""));
+
+    double w_jac = 0.;
+    unsigned iter_jac = max_iter + 1;
 
     // Jacobi
-    for (double w = W0; w <= 1; w += W0)
+    for (double w = W0; w <= 1; w += W_STEP)
     {
         unsigned iter = 0;
         auto jacobi_res = a.jacobi(w, f0, f, eps, max_iter, iter);
+
+        if (iter < iter_jac)
+        {
+            w_jac = w;
+            iter_jac = iter;
+        }
+
         dump_table_row(out, w, jacobi_res, es, iter);
     }
 
+    out.close();
+    out.open(DATA_PATH + "gauss_seidel_res.csv");
+
+    double w_gs = 0.;
+    unsigned iter_gs = max_iter + 1;
+
     // Gauss-Seidel
-    for (double w = W0; w <= 1.95; w += W0)
+    for (double w = W0; w <= 1.99; w += W_STEP)
     {
         unsigned iter = 0;
         auto gs_res = a.gauss_seidel(w, f0, f, eps, max_iter, iter);
+
+        if (iter < iter_gs)
+        {
+            w_gs = w;
+            iter_gs = iter;
+        }
+
         dump_table_row(out, w, gs_res, es, iter);
     }
+
+    cout << "W for Jacobi: " << w_jac << endl;
+    cout << "W for Gauss-Seidel: " << w_gs << endl;
 }
 
 #pragma endregion
@@ -155,6 +183,8 @@ void weight_research()
 int main()
 {
     initial_testing();
+
+    weight_research();
 
     system("pause");
 

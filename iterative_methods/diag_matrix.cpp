@@ -113,13 +113,11 @@ public:
         return y;
     }
 
-    std::vector<T> step(const double &omega, const std::vector<T> &xk, const std::vector<T> &xk_1, const std::vector<T> &f)
+    void step(const double &omega, const std::vector<T> &xk, std::vector<T> &xk_1, std::vector<T> &y, const std::vector<T> &f)
     {
-        std::vector<T> y(xk.size());
-       // T sum1 = 0, sum2 = 0; // sum1 - lower (xk1), sum2 - upper and main diag (xk)
-
         for (size_t i = 0; i < N; i++)
         {
+            // sum1 - lower (xk1), sum2 - upper and main diag (xk)
             // main diagonal
             T sum2 = diags[4][i] * xk[i];
             T sum1 = 0;
@@ -152,32 +150,30 @@ public:
 
             y[i] = xk[i] + omega / diags[4][i] * (f[i] - sum1 - sum2);
         }
-        
-        return y;
     }
 
     std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
         unsigned &total_iter)
     {
         auto xk = f0;
-        std::vector<T> xk_1;
+        std::vector<T> xk_1(xk.size()), y(xk.size());
         unsigned iter = 0;
         T rr = 0;
 
         do
         {
-            xk_1 = step(omega, xk, xk, f);
-            rr = relative_residual(f, xk_1);
+            step(omega, xk, xk, y, f);
+            rr = relative_residual(f, y);
 
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
-            xk = xk_1;
+            xk = y;
             iter++;
         } while (rr >= eps && iter < max_iter);
 
         total_iter = iter;
 
-        return xk_1;
+        return xk;
     }
 
     std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
@@ -190,10 +186,10 @@ public:
 
         do
         {
-            xk_1 = step(omega, xk, xk_1, f);
+            step(omega, xk, xk_1, xk_1, f);
             rr = relative_residual(f, xk_1);
 
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
             iter++;
@@ -201,6 +197,6 @@ public:
 
         total_iter = iter;
 
-        return xk_1;
+        return xk;
     }
 };
