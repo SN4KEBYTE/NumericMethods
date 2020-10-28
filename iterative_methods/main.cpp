@@ -13,6 +13,8 @@ const unsigned TEST_NUM = 1;
 
 void initial_testing()
 {
+    unsigned dummy_iter = 0;
+
     ifstream in;
     ofstream out;
 
@@ -47,8 +49,8 @@ void initial_testing()
         in >> omega >> eps >> max_iter;
         in.close();
 
-        auto jacobi_res = a.jacobi(omega, f0, f, eps, max_iter);
-        auto gs_res = a.gauss_seidel(omega, f0, f, eps, max_iter);
+        auto jacobi_res = a.jacobi(omega, f0, f, eps, max_iter, dummy_iter);
+        auto gs_res = a.gauss_seidel(omega, f0, f, eps, max_iter, dummy_iter);
 
         out.open(cur_test_path + "res_jacobi.txt");
 

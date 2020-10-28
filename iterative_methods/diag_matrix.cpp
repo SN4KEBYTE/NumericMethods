@@ -7,8 +7,6 @@
 const size_t DIAGS_NUM = 9;
 const size_t SIDE_DIAGS_NUM = 4;
 
-unsigned dummy_iter = 0;
-
 template<typename T>
 class diag_matrix
 {
@@ -118,12 +116,13 @@ public:
     std::vector<T> step(const double &omega, const std::vector<T> &xk, const std::vector<T> &xk_1, const std::vector<T> &f)
     {
         std::vector<T> y(xk.size());
-        T sum1 = 0, sum2 = 0; // sum1 - lower (xk1), sum2 - upper and main diag (xk)
+       // T sum1 = 0, sum2 = 0; // sum1 - lower (xk1), sum2 - upper and main diag (xk)
 
         for (size_t i = 0; i < N; i++)
         {
             // main diagonal
-            sum2 += diags[4][i] * xk[i];
+            T sum2 = diags[4][i] * xk[i];
+            T sum1 = 0;
 
             // lower triangle
             if (i > 0)
@@ -150,16 +149,15 @@ public:
 
             if (i < N - ig[3])
                 sum2 += diags[8][i] * xk[i + ig[3]];
-        }
 
-        for (size_t i = 0; i < N; i++)
             y[i] = xk[i] + omega / diags[4][i] * (f[i] - sum1 - sum2);
+        }
         
         return y;
     }
 
     std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
-        unsigned &total_iter = dummy_iter)
+        unsigned &total_iter)
     {
         auto xk = f0;
         std::vector<T> xk_1;
@@ -183,7 +181,7 @@ public:
     }
 
     std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
-        unsigned &total_iter = dummy_iter)
+        unsigned &total_iter)
     {
         auto xk = f0;
         std::vector<T> xk_1(xk.size());
