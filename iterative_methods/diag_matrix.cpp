@@ -122,13 +122,6 @@ public:
         xk_1.resize(N);
     }
 
-    diag_matrix(const size_t &N, const size_t &m, const std::vector<std::vector<T>> &diags)
-    {
-        this->N = N;
-        this->m = m;
-        this->diags = diags;
-    }
-
     T relative_residual(const std::vector<T> &f, const std::vector<T> &xk)
     {
         return norm(vec_diff(f, dot(xk))) / norm(f);
@@ -173,7 +166,7 @@ public:
             rr = relative_residual(f, xk_1);
 
             ++iter;
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
         }
@@ -197,7 +190,7 @@ public:
             rr = relative_residual(f, xk_1);
 
             ++iter;
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
         }
