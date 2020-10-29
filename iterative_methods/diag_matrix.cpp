@@ -15,7 +15,11 @@ private:
     std::vector<std::vector<T>> diags;
     std::vector<size_t> ig;
 
-    std::vector<T> dot(const std::vector<T> x)
+    // for solving methods
+    std::vector<T> xk;
+    std::vector<T> xk_1;
+
+    std::vector<T> dot(const std::vector<T> &x)
     {
         std::vector<T> y(x.size());
 
@@ -25,7 +29,7 @@ private:
             y[i] = diags[4][i] * x[i];
 
             // lower triangle
-            if (i > 0)
+            if (i > ig[0] - 1)
                 y[i] += diags[3][i] * x[i - ig[0]];
 
             if (i > ig[1] - 1)
@@ -64,7 +68,7 @@ private:
             T sum1 = 0;
 
             // lower triangle
-            if (i > 0)
+            if (i > ig[0] - 1)
                 sum1 += diags[3][i] * xk_1[i - ig[0]];
 
             if (i > ig[1] - 1)
@@ -113,9 +117,12 @@ public:
 
         for (size_t i = 1; i < ig.size(); i++)
             ig[i] = m + i + 1;
+
+        xk.resize(N);
+        xk_1.resize(N);
     }
 
-    diag_matrix(const size_t &N, const size_t &m, const std::vector<T> diags)
+    diag_matrix(const size_t &N, const size_t &m, const std::vector<std::vector<T>> &diags)
     {
         this->N = N;
         this->m = m;
@@ -127,7 +134,7 @@ public:
         return norm(vec_diff(f, dot(xk))) / norm(f);
     }
 
-    T norm(const std::vector<T> x)
+    T norm(const std::vector<T> &x)
     {
         T res = 0;
 
@@ -152,48 +159,48 @@ public:
         return N;
     }
 
-    std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
+    std::vector<T> jacobi(const double &omega, const std::vector<T> &f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
         unsigned &total_iter)
     {
-        auto xk = f0;
-        std::vector<T> xk_1(xk.size()), y(xk.size());
+        xk = f0;
+        
         unsigned iter = 0;
-        T rr = 0;
+        T rr = relative_residual(f, xk);
 
-        do
+        while (rr >= eps && iter < max_iter)
         {
-            step(omega, xk, xk, y, f);
-            rr = relative_residual(f, y);
+            step(omega, xk, xk, xk_1, f);
+            rr = relative_residual(f, xk_1);
 
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            ++iter;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
-            xk = y;
-            iter++;
-        } while (rr >= eps && iter < max_iter);
+            xk = xk_1;
+        }
 
         total_iter = iter;
 
         return xk;
     }
 
-    std::vector<T> gauss_seidel(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
+    std::vector<T> gauss_seidel(const double &omega, const std::vector<T> &f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
         unsigned &total_iter)
     {
-        auto xk = f0;
-        std::vector<T> xk_1(xk.size());
+        xk = f0;
+        
         unsigned iter = 0;
-        T rr = 0;
+        T rr = relative_residual(f, xk);
 
-        do
+        while (rr >= eps && iter < max_iter)
         {
             step(omega, xk, xk_1, xk_1, f);
             rr = relative_residual(f, xk_1);
 
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            ++iter;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
-            iter++;
-        } while (rr >= eps && iter < max_iter);
+        }
 
         total_iter = iter;
 
