@@ -15,65 +15,6 @@ private:
     std::vector<std::vector<T>> diags;
     std::vector<size_t> ig;
 
-    T relative_residual(const std::vector<T> &f, const std::vector<T> &xk)
-    {
-        return norm(vec_diff(f, dot(xk))) / norm(f);
-    }
-
-    T norm(const std::vector<T> x)
-    {
-        T res = 0;
-
-        for (const auto &el : x)
-            res += el * el;
-
-        return sqrt(res);
-    }
-
-    std::vector<T> vec_diff(const std::vector<T> &x, const std::vector<T> &y)
-    {
-        std::vector<T> res(x.size());
-
-        for (size_t i = 0; i < res.size(); i++)
-            res[i] = x[i] - y[i];
-
-        return res;
-    }
-
-public:
-    diag_matrix(std::istream &in)
-    {
-        diags.resize(DIAGS_NUM);
-        ig.resize(SIDE_DIAGS_NUM);
-
-        in >> N >> m;
-
-        for (size_t i = 0; i < diags.size(); i++)
-        {
-            diags[i].resize(N);
-
-            for (size_t j = 0; j < diags[i].size(); j++)
-                in >> diags[i][j];
-        }
-
-        ig[0] = 1;
-
-        for (size_t i = 1; i < ig.size(); i++)
-            ig[i] = m + i + 1;
-    }
-
-    diag_matrix(const size_t &N, const size_t &m, const std::vector<T> diags)
-    {
-        this->N = N;
-        this->m = m;
-        this->diags = diags;
-    }
-
-    size_t get_dim()
-    {
-        return N;
-    }
-
     std::vector<T> dot(const std::vector<T> x)
     {
         std::vector<T> y(x.size());
@@ -152,6 +93,65 @@ public:
         }
     }
 
+public:
+    diag_matrix(std::istream &in)
+    {
+        diags.resize(DIAGS_NUM);
+        ig.resize(SIDE_DIAGS_NUM);
+
+        in >> N >> m;
+
+        for (size_t i = 0; i < diags.size(); i++)
+        {
+            diags[i].resize(N);
+
+            for (size_t j = 0; j < diags[i].size(); j++)
+                in >> diags[i][j];
+        }
+
+        ig[0] = 1;
+
+        for (size_t i = 1; i < ig.size(); i++)
+            ig[i] = m + i + 1;
+    }
+
+    diag_matrix(const size_t &N, const size_t &m, const std::vector<T> diags)
+    {
+        this->N = N;
+        this->m = m;
+        this->diags = diags;
+    }
+
+    T relative_residual(const std::vector<T> &f, const std::vector<T> &xk)
+    {
+        return norm(vec_diff(f, dot(xk))) / norm(f);
+    }
+
+    T norm(const std::vector<T> x)
+    {
+        T res = 0;
+
+        for (const auto &el : x)
+            res += el * el;
+
+        return sqrt(res);
+    }
+
+    std::vector<T> vec_diff(const std::vector<T> &x, const std::vector<T> &y)
+    {
+        std::vector<T> res(x.size());
+
+        for (size_t i = 0; i < res.size(); i++)
+            res[i] = x[i] - y[i];
+
+        return res;
+    }
+
+    size_t get_dim()
+    {
+        return N;
+    }
+
     std::vector<T> jacobi(const double &omega, const std::vector<T> f0, const std::vector<T> &f, const T &eps, const size_t &max_iter,
         unsigned &total_iter)
     {
@@ -165,7 +165,7 @@ public:
             step(omega, xk, xk, y, f);
             rr = relative_residual(f, y);
 
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = y;
             iter++;
@@ -189,7 +189,7 @@ public:
             step(omega, xk, xk_1, xk_1, f);
             rr = relative_residual(f, xk_1);
 
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk = xk_1;
             iter++;
