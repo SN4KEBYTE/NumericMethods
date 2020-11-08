@@ -19,45 +19,6 @@ private:
     std::vector<T> xk;
     std::vector<T> xk_1;
 
-    std::vector<T> dot(const std::vector<T> &x)
-    {
-        std::vector<T> y(x.size());
-
-        for (size_t i = 0; i < N; i++)
-        {
-            // main diagonal
-            y[i] = diags[4][i] * x[i];
-
-            // lower triangle
-            if (i > ig[0] - 1)
-                y[i] += diags[3][i] * x[i - ig[0]];
-
-            if (i > ig[1] - 1)
-                y[i] += diags[2][i] * x[i - ig[1]];
-
-            if (i > ig[2] - 1)
-                y[i] += diags[1][i] * x[i - ig[2]];
-
-            if (i > ig[3] - 1)
-                y[i] += diags[0][i] * x[i - ig[3]];
-
-            // upper triangle
-            if (i < N - ig[0])
-                y[i] += diags[5][i] * x[i + ig[0]];
-
-            if (i < N - ig[1])
-                y[i] += diags[6][i] * x[i + ig[1]];
-
-            if (i < N - ig[2])
-                y[i] += diags[7][i] * x[i + ig[2]];
-
-            if (i < N - ig[3])
-                y[i] += diags[8][i] * x[i + ig[3]];
-        }
-
-        return y;
-    }
-
     void step(const double &omega, const std::vector<T> &xk, std::vector<T> &xk_1, std::vector<T> &y, const std::vector<T> &f)
     {
         for (size_t i = 0; i < N; i++)
@@ -124,7 +85,41 @@ public:
 
     T relative_residual(const std::vector<T> &f, const std::vector<T> &xk)
     {
-        return norm(vec_diff(f, dot(xk))) / norm(f);
+        T sum = 0;
+
+        for (size_t i = 0; i < N; i++)
+        {
+            T elem = diags[4][i] * xk[i];
+
+            if (i > ig[0] - 1)
+                elem += diags[3][i] * xk[i - ig[0]];
+
+            if (i > ig[1] - 1)
+                elem += diags[2][i] * xk[i - ig[1]];
+
+            if (i > ig[2] - 1)
+                elem += diags[1][i] * xk[i - ig[2]];
+
+            if (i > ig[3] - 1)
+                elem += diags[0][i] * xk[i - ig[3]];
+
+            if (i < N - ig[0])
+                elem += diags[5][i] * xk[i + ig[0]];
+
+            if (i < N - ig[1])
+                elem += diags[6][i] * xk[i + ig[1]];
+
+            if (i < N - ig[2])
+                elem += diags[7][i] * xk[i + ig[2]];
+
+            if (i < N - ig[3])
+                elem += diags[8][i] * xk[i + ig[3]];
+
+            elem = f[i] - elem;
+            sum += elem * elem;
+        }
+
+        return sqrt(sum) / norm(f);
     }
 
     T norm(const std::vector<T> &x)
@@ -166,9 +161,9 @@ public:
             rr = relative_residual(f, xk_1);
 
             ++iter;
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
-            xk = xk_1;
+            xk.swap(xk_1);
         }
 
         total_iter = iter;
@@ -186,13 +181,11 @@ public:
 
         while (rr >= eps && iter < max_iter)
         {
-            step(omega, xk, xk_1, xk_1, f);
-            rr = relative_residual(f, xk_1);
+            step(omega, xk, xk, xk, f);
+            rr = relative_residual(f, xk);
 
             ++iter;
-            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
-
-            xk = xk_1;
+            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
         }
 
         total_iter = iter;
