@@ -19,7 +19,8 @@ private:
     std::vector<T> xk;
     std::vector<T> xk_1;
 
-    void step(const double &omega, const std::vector<T> &xk, std::vector<T> &xk_1, std::vector<T> &y, const std::vector<T> &f)
+    void step(const double &omega, const std::vector<T> &xk, std::vector<T> &xk_1, std::vector<T> &y, const std::vector<T> &f, 
+        T &rr, const bool &is_jacobi = false)
     {
         for (size_t i = 0; i < N; i++)
         {
@@ -54,8 +55,16 @@ private:
             if (i < N - ig[3])
                 sum2 += diags[8][i] * xk[i + ig[3]];
 
-            y[i] = xk[i] + omega / diags[4][i] * (f[i] - sum1 - sum2);
+            T tmp = f[i] - sum1 - sum2;
+            
+            if (is_jacobi)
+                rr += tmp * tmp;
+
+            y[i] = xk[i] + omega / diags[4][i] * tmp;
         }
+
+        if (is_jacobi)
+            rr = sqrt(rr) / norm(f);
     }
 
 public:
@@ -153,18 +162,18 @@ public:
         xk = f0;
         
         unsigned iter = 0;
-        T rr = relative_residual(f, xk);
+        T rr = 0;
 
-        while (rr >= eps && iter < max_iter)
+        do 
         {
-            step(omega, xk, xk, xk_1, f);
-            rr = relative_residual(f, xk_1);
+            rr = 0;
+            step(omega, xk, xk, xk_1, f, rr, true);
 
             ++iter;
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
 
             xk.swap(xk_1);
-        }
+        } while (rr >= eps && iter < max_iter);
 
         total_iter = iter;
 
@@ -181,11 +190,11 @@ public:
 
         while (rr >= eps && iter < max_iter)
         {
-            step(omega, xk, xk, xk, f);
+            step(omega, xk, xk, xk, f, rr);
             rr = relative_residual(f, xk);
 
             ++iter;
-            //std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
+            std::cout << "Iteration #" << iter << "; rr = " << rr << std::endl;
         }
 
         total_iter = iter;
